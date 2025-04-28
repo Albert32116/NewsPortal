@@ -1,0 +1,64 @@
+# Импорт моделей
+from news.models import *
+from django.contrib.auth.models import User
+
+# Создание пользователей
+user1 = User.objects.create_user(username='Кирилл', password='12345')
+user2 = User.objects.create_user(username='Тимофей', password='54321')
+
+# Создание авторов
+author1 = Author.objects.create(user=user1)
+author2 = Author.objects.create(user=user2)
+
+# Создание категорий
+cat1 = Category.objects.create(name='Спорт')
+cat2 = Category.objects.create(name='Политика')
+cat3 = Category.objects.create(name='Образование')
+cat4 = Category.objects.create(name='Культура')
+
+# Создание постов (2 статьи и 1 новость)
+post1 = Post.objects.create(author=author1, post_type='AR', title='Олимпиада 2024', content='Ожидается множество новых рекордов на Олимпиаде 2024 года...')
+post2 = Post.objects.create(author=author2, post_type='AR', title='Выборы 2025', content='Предвыборная гонка в разгаре, кандидаты проводят дебаты и встречи с избирателями...')
+post3 = Post.objects.create(author=author1, post_type='NW', title='Концерт группы', content='Прошёл грандиозный концерт Басты в Новосибирске собрав десятки тысяч зрителей.')
+
+# Назначение категорий постам
+post1.categories.add(cat1, cat3)
+post2.categories.add(cat2)
+post3.categories.add(cat4)
+
+# Создание комментариев
+comment1 = Comment.objects.create(post=post1, user=user2, content='Очень интересно! Будем ждать Олимпиаду.')
+comment2 = Comment.objects.create(post=post2, user=user1, content='Не согласен с мнением автора.')
+comment3 = Comment.objects.create(post=post3, user=user2, content='Был на концерте, это было незабываемо!')
+comment4 = Comment.objects.create(post=post1, user=user1, content='Спасибо за полезную информацию!')
+
+# Лайки и дизлайки постов
+post1.like()
+post1.like()
+post2.like()
+post2.dislike()
+post3.like()
+
+# Лайки и дизлайки комментариев
+comment1.like()
+comment2.dislike()
+comment3.like()
+comment4.like()
+
+# Обновление рейтингов авторов
+author1.update_rating()
+author2.update_rating()
+
+# Вывод лучшего автора
+best_author = Author.objects.order_by('-rating').first()
+print(f'Лучший автор: {best_author.user.username}, рейтинг: {best_author.rating}')
+
+# Вывод лучшего поста
+print(f'Дата публикации: {best_post.created_at}, Автор: {best_post.author.user.username}, Рейтинг поста: {best_post.rating}, Заголовок: {best_post.title}, Превью статьи: {best_post.preview()}')
+
+
+# Вывод всех комментариев к лучшему посту
+comments = Comment.objects.filter(post=best_post)
+for comment in comments:
+    print(f'\nДата: {comment.created_at}, Пользователь: {comment.user.username}, Рейтинг комментария: {comment.rating}, Текст комментария: {comment.content}')
+
